@@ -70,6 +70,7 @@ export async function POST(request) {
     return NextResponse.json({
       id: entryId,
       tag_seen_count: tagSeenCount,
+      desired_outcome: safeOutcome, // echo back so the result view can show the goal chip
       ...analysis,
     });
   } catch (error) {

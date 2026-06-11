@@ -609,7 +609,12 @@ a:hover { color: var(--color-text-link-hover); }
 @media (prefers-reduced-motion: reduce) { .analyzing-spinner { animation-duration: 1.6s; } }
 
 /* ─── Example chips (first-run affordance) ──────────────── */
-.example-chips { margin-top: var(--space-3); }
+/* Proximity: the chips fill the message field, so they cluster with it
+   (tight above) and stand clear of the next form group (roomy below). */
+.example-chips {
+  margin-top: calc(-1 * var(--space-2));
+  margin-bottom: var(--space-6);
+}
 .example-chips-label {
   display: block; margin-bottom: var(--space-2);
   font-family: var(--type-mono); font-weight: var(--weight-medium); font-size: 11px;

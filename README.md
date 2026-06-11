@@ -6,16 +6,11 @@ The reasoning runs in a local model through [Ollama](https://ollama.com). Histor
 
 > **Status:** a finished personal project, shared as-is. Not actively maintained — issues and pull requests may not get a response. Fork it freely.
 
-<!--
-Screenshots: capture the Analyze, History, and Insights views and save them as
-docs/analyze.png, docs/history.png, docs/insights.png — then uncomment this block.
-
 ## Screenshots
 
 | Analyze | History | Insights |
 | --- | --- | --- |
-| ![Analyze view](docs/analyze.png) | ![History view](docs/history.png) | ![Insights view](docs/insights.png) |
--->
+| ![The Analyze form](docs/analyze.png) | ![History with logged outcomes](docs/history.png) | ![Insights: lessons and what worked](docs/insights.png) |
 
 ## What it does
 
