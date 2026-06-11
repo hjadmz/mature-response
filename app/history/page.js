@@ -73,7 +73,11 @@ export default function HistoryPage() {
   }
 
   function handleCardKey(e, id) {
-    // Space/Enter activate the card like a button (it is keyboard-focusable).
+    // Space/Enter activate the card like a button (it is keyboard-focusable) —
+    // but only when the CARD ITSELF is focused. Keystrokes inside the expanded
+    // controls (outcome notes, buttons) bubble up here; without this guard,
+    // typing a space in the notes field would collapse the card.
+    if (e.target !== e.currentTarget) return;
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       toggleExpand(id);
