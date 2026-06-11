@@ -1,0 +1,31 @@
+{
+  "name": "mature-response",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A local-first communication coach. Decide whether and how to respond to a message, or how to word something you need to say. Runs on a local model via Ollama.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.18"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "node --test tests/parse.test.js tests/rules.test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "next": "16.2.7",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.2.7"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
+  }
+}
