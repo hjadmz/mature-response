@@ -68,6 +68,23 @@ export default function HistoryPage() {
     }
   }
 
+  function handleExport() {
+    // Streams the full database as a downloadable JSON file.
+    window.location.href = '/api/entries?export=1';
+  }
+
+  async function handleEraseAll() {
+    if (!window.confirm('Erase ALL history? Every entry will be permanently deleted from this computer.')) return;
+    if (!window.confirm('This cannot be undone. Erase everything?')) return;
+    try {
+      await fetch('/api/entries?all=true', { method: 'DELETE' });
+      setExpandedId(null);
+      fetchEntries(searchQuery, contextFilter);
+    } catch (err) {
+      console.error('Failed to erase history:', err);
+    }
+  }
+
   function toggleExpand(id) {
     setExpandedId(expandedId === id ? null : id);
   }
@@ -262,6 +279,18 @@ export default function HistoryPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Your data, your controls: take it with you, or make it gone. */}
+      {entries.length > 0 && (
+        <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', marginTop: 'var(--space-6)' }}>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={handleExport}>
+            Export all (JSON)
+          </button>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={handleEraseAll}>
+            Erase all history
+          </button>
         </div>
       )}
     </div>

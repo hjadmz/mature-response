@@ -91,6 +91,7 @@ export async function POST(request) {
       friendly = 'Cannot reach Ollama.';
       hint = 'Start Ollama first — run: ollama serve — then try again.';
     }
-    return NextResponse.json({ error: friendly, hint, details: msg }, { status: 503 });
+    // Internal error strings stay in the server log, never in the response.
+    return NextResponse.json({ error: friendly, hint }, { status: 503 });
   }
 }

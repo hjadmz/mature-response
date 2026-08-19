@@ -6,12 +6,12 @@
   "description": "A local-first communication coach. Decide whether and how to respond to a message, or how to word something you need to say. Runs on a local model via Ollama.",
   "license": "MIT",
   "engines": {
-    "node": ">=18.18"
+    "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 127.0.0.1",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 127.0.0.1",
     "lint": "eslint",
     "test": "node --test tests/parse.test.js tests/rules.test.js"
   },

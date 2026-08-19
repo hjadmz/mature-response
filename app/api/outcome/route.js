@@ -27,7 +27,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Outcome update error:', error);
     return NextResponse.json(
-      { error: 'Failed to update outcome', details: error.message },
+      { error: 'Failed to update outcome' },
       { status: 500 }
     );
   }
