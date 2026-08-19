@@ -3,7 +3,7 @@
 import { ENGAGEMENT_LEVELS, COACHING_TAGS } from '@/lib/constants';
 
 export default function InsightsPanel({ insights }) {
-  if (!insights || insights.totalEntries === 0) {
+  if (!insights || typeof insights.totalEntries !== 'number' || insights.totalEntries === 0) {
     return (
       <div className="empty-state">
         <div className="empty-state-title">No insights yet</div>
@@ -66,7 +66,7 @@ export default function InsightsPanel({ insights }) {
       {/* Lessons you keep meeting — the learning loop */}
       {recurringLessons.length > 0 && (
         <div className="insight-card">
-          <div className="form-label" style={{ marginBottom: 'var(--space-4)' }}>Lessons You Keep Meeting</div>
+          <h2 className="form-label" style={{ marginBottom: 'var(--space-4)' }}>Lessons You Keep Meeting</h2>
           {recurringLessons.map((lesson) => (
             <div key={lesson.tag} className={`lesson-row ${lesson.count > 1 ? 'recurring' : ''}`}>
               <span className="lesson-row-text">{COACHING_TAGS[lesson.tag] || lesson.tag}</span>
@@ -90,7 +90,7 @@ export default function InsightsPanel({ insights }) {
           {/* What's worked, by action */}
           {engagementStats.length > 0 && (
             <div className="insight-card">
-              <div className="form-label" style={{ marginBottom: 'var(--space-4)' }}>What&rsquo;s Worked For You</div>
+              <h2 className="form-label" style={{ marginBottom: 'var(--space-4)' }}>What&rsquo;s Worked For You</h2>
               {engagementStats.map((stat) => {
                 const successPct = stat.total > 0 ? Math.round((stat.successful / stat.total) * 100) : 0;
                 const escalatedPct = stat.total > 0 ? Math.round((stat.escalated / stat.total) * 100) : 0;
@@ -113,7 +113,7 @@ export default function InsightsPanel({ insights }) {
 
           {/* Outcome distribution */}
           <div className="insight-card">
-            <div className="form-label" style={{ marginBottom: 'var(--space-4)' }}>Outcome Distribution</div>
+            <h2 className="form-label" style={{ marginBottom: 'var(--space-4)' }}>Outcome Distribution</h2>
             {overallStats.map((stat) => {
               const pct = Math.round((stat.count / totalWithOutcomes) * 100);
               return (

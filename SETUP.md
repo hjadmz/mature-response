@@ -4,7 +4,7 @@ A one-time setup, then double-click to run. No coding required.
 
 ## 1. Install the two prerequisites (once)
 
-1. **Node.js** — <https://nodejs.org> · download the **LTS** version and run the installer.
+1. **Node.js 20.9 or newer** — <https://nodejs.org> · download the **LTS** version and run the installer.
 2. **Ollama** — <https://ollama.com> · download and install. It runs quietly in the background.
 
 ## 2. Add a model (once)
@@ -30,6 +30,6 @@ The first run installs and builds (a minute or two). After that it starts quickl
 
 ---
 
-**If you see "the model ran out of memory":** pick a smaller model from the **Model** menu in the app. Large models (like a 70B) need a lot of RAM. `llama3:8b` works on most machines.
+**If you see "The model stopped — most likely out of memory":** pick a smaller model from the **Model** menu in the app. Large models (like a 70B) need a lot of RAM. `llama3:8b` works on most machines.
 
 **Your data stays yours.** Everything runs on this computer. Nothing is uploaded.

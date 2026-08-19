@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import RiskBadge from '@/components/RiskBadge';
 import OutcomeLogger from '@/components/OutcomeLogger';
 import { ENGAGEMENT_LEVELS, CONTEXT_TYPES, OUTCOME_OPTIONS } from '@/lib/constants';
@@ -22,66 +22,92 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [contextFilter, setContextFilter] = useState('all');
   const [outcomeFilter, setOutcomeFilter] = useState('all'); // all | pending | logged
-  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [readError, setReadError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const headingRef = useRef(null);
+  const requestId = useRef(0);
 
   const fetchEntries = useCallback(async (search, context) => {
+    const id = ++requestId.current; // a slower earlier fetch must not repaint
     try {
       const params = new URLSearchParams();
+      params.set('limit', '500'); // the route's max; below it, "needs outcome" is exact
       if (context && context !== 'all') params.set('context', context);
       if (search && search.trim()) params.set('search', search.trim());
       const res = await fetch(`/api/entries?${params.toString()}`);
       const data = await res.json();
-      setEntries(data.entries || []);
+      if (!res.ok || !Array.isArray(data.entries)) throw new Error(data.error || 'Unreadable response');
+      if (id !== requestId.current) return;
+      setEntries(data.entries);
+      setReadError('');
     } catch (err) {
+      if (id !== requestId.current) return;
+      // An unreadable history is not an empty history — never say "none yet".
       console.error('Failed to load entries:', err);
+      setReadError('Could not read your history.');
     } finally {
-      setLoading(false);
+      if (id === requestId.current) setLoading(false);
     }
   }, []);
 
+  // One debounced effect owns both inputs. With two timers a filter change
+  // could land after a search and repaint the previous filter's results.
   useEffect(() => {
-    // searchQuery is intentionally excluded: search refetches are debounced in
-    // handleSearchChange, so depending on it here would fetch on every keystroke.
-    fetchEntries(searchQuery, contextFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contextFilter, fetchEntries]);
-
-  // Debounced search
-  function handleSearchChange(value) {
-    setSearchQuery(value);
-    if (searchTimeout) clearTimeout(searchTimeout);
-    const timeout = setTimeout(() => {
-      fetchEntries(value, contextFilter);
-    }, 300);
-    setSearchTimeout(timeout);
-  }
+    const t = setTimeout(() => fetchEntries(searchQuery, contextFilter), 300);
+    return () => clearTimeout(t);
+  }, [searchQuery, contextFilter, fetchEntries]);
 
   async function handleDelete(id, e) {
     e.stopPropagation();
     if (!window.confirm('Delete this entry? This cannot be undone.')) return;
+    setActionError('');
     try {
-      await fetch(`/api/entries?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/entries?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('delete failed');
       setExpandedId(null);
-      fetchEntries(searchQuery, contextFilter);
+      await fetchEntries(searchQuery, contextFilter);
+      // The card that had focus is gone; put it somewhere deliberate.
+      document.querySelector('.history-card-toggle')?.focus()
+        || document.getElementById('history-search')?.focus();
     } catch (err) {
       console.error('Failed to delete entry:', err);
+      setActionError('Could not delete that entry. It is still saved.');
     }
   }
 
-  function handleExport() {
-    // Streams the full database as a downloadable JSON file.
-    window.location.href = '/api/entries?export=1';
+  async function handleExport() {
+    // Fetch rather than navigate: a failure here should be a message in the
+    // page, not the app replaced by a raw JSON error document.
+    setActionError('');
+    try {
+      const res = await fetch('/api/entries?export=1');
+      if (!res.ok) throw new Error('export failed');
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mature-response-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export:', err);
+      setActionError('Could not export — your history file could not be read.');
+    }
   }
 
   async function handleEraseAll() {
     if (!window.confirm('Erase ALL history? Every entry will be permanently deleted from this computer.')) return;
     if (!window.confirm('This cannot be undone. Erase everything?')) return;
+    setActionError('');
     try {
-      await fetch('/api/entries?all=true', { method: 'DELETE' });
+      const res = await fetch('/api/entries?all=true', { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || typeof data.deleted !== 'number') throw new Error('erase failed');
       setExpandedId(null);
-      fetchEntries(searchQuery, contextFilter);
+      await fetchEntries(searchQuery, contextFilter);
+      headingRef.current?.focus(); // the list is gone; announce where we are
     } catch (err) {
       console.error('Failed to erase history:', err);
+      setActionError('Nothing was erased — the history file could not be written.');
     }
   }
 
@@ -130,7 +156,7 @@ export default function HistoryPage() {
 
   return (
     <div className="page-container">
-      <h1 className="page-title">History</h1>
+      <h1 className="page-title" ref={headingRef} tabIndex={-1}>History</h1>
       <p className="page-subtitle">Past analyses. Click to expand and log outcomes.</p>
 
       {/* Search & Filter Bar */}
@@ -141,7 +167,7 @@ export default function HistoryPage() {
           placeholder="Search messages..."
           aria-label="Search messages"
           value={searchQuery}
-          onChange={(e) => handleSearchChange(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
           id="history-search"
         />
         <select
@@ -169,7 +195,19 @@ export default function HistoryPage() {
         </select>
       </div>
 
-      {visibleEntries.length === 0 ? (
+      {actionError && (
+        <div className="notice notice-error" role="alert">{actionError}</div>
+      )}
+
+      {readError ? (
+        <div className="notice notice-error" role="alert">
+          {readError}{' '}
+          <button type="button" className="btn btn-secondary btn-sm" style={{ marginLeft: 'var(--space-3)' }}
+            onClick={() => fetchEntries(searchQuery, contextFilter)}>
+            Retry
+          </button>
+        </div>
+      ) : visibleEntries.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-title">
             {searchQuery || contextFilter !== 'all' || outcomeFilter !== 'all' ? 'No Matches' : 'No Analyses Yet'}
@@ -181,6 +219,12 @@ export default function HistoryPage() {
           </div>
         </div>
       ) : (
+        <>
+        {entries.length >= 500 && (
+          <p style={{ color: 'var(--fg-3)', fontSize: 'var(--step--1)', marginBottom: 'var(--space-3)' }}>
+            Showing the 500 most recent.
+          </p>
+        )}
         <div className="history-list">
           {visibleEntries.map((entry) => {
             const isExpanded = expandedId === entry.id;
@@ -281,6 +325,7 @@ export default function HistoryPage() {
             );
           })}
         </div>
+        </>
       )}
 
       {/* Your data, your controls: take it with you, or make it gone. */}

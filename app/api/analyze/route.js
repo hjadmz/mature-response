@@ -14,6 +14,13 @@ const MAX_NOTE_CHARS = 1000;
 
 export async function POST(request) {
   try {
+  // A cross-origin page can POST text/plain to loopback with no preflight, so
+  // requiring JSON is what actually stops a silent write from another site.
+  if (!(request.headers.get('content-type') || '').includes('application/json')) {
+    return NextResponse.json({ error: 'Expected application/json' }, { status: 415 });
+  }
+
+
     const body = await request.json();
     const { message_text, context_type, perceived_tone, emotional_reaction, feeling, optional_note, desired_outcome, mode, model } = body;
 
@@ -35,7 +42,13 @@ export async function POST(request) {
     const safeNote = typeof optional_note === 'string' ? optional_note.slice(0, MAX_NOTE_CHARS) : '';
 
     // Real feedback loop: what has actually worked for this user shapes the read.
-    const outcomePriors = getOutcomePriors();
+    // An unreadable history degrades to "no priors", it does not fail the analysis.
+    let outcomePriors = '';
+    try {
+      outcomePriors = getOutcomePriors();
+    } catch (e) {
+      console.error('Outcome priors unavailable:', e.message);
+    }
 
     // AI Analysis
     const analysis = await analyzeMessage({
@@ -55,8 +68,12 @@ export async function POST(request) {
     const tagSeenCount = getTagCount(analysis.coaching_tag);
 
     // Store in DB (the sanitized values — what was actually analyzed)
+    // The analysis is already done; a failed write must not throw it away.
+    let entryId = null;
+    let saved = true;
+    try {
     // Spread the model's output FIRST so trusted, sanitized values always win.
-    const entryId = insertEntry({
+    entryId = insertEntry({
       ...analysis,
       message_text,
       context_type: safeContext,
@@ -67,10 +84,15 @@ export async function POST(request) {
       desired_outcome: safeOutcome,
       model_used: selectedModel,
     });
+    } catch (e) {
+      console.error('Could not save this analysis:', e.message);
+      saved = false;
+    }
 
     return NextResponse.json({
       ...analysis,
       id: entryId,
+      saved,
       tag_seen_count: tagSeenCount,
       desired_outcome: safeOutcome, // echo back so the result view can show the goal chip
     });

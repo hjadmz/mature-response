@@ -111,7 +111,7 @@ export default function SituationCard({ onSubmit, isLoading }) {
 
       {/* Section: the situation */}
       <section className="form-section">
-        <div className="form-section-title">{isComm ? 'What you want to say' : 'The situation'}</div>
+        <h2 className="form-section-title">{isComm ? 'What you want to say' : 'The situation'}</h2>
         <div className="form-group">
           <label className="form-label" htmlFor="message-input">
             {isComm ? 'Your message or situation' : 'Message received'}
@@ -167,7 +167,7 @@ export default function SituationCard({ onSubmit, isLoading }) {
 
       {/* Section: context & goal */}
       <section className="form-section">
-        <div className="form-section-title">Context &amp; goal</div>
+        <h2 className="form-section-title">Context &amp; goal</h2>
         <div className="form-row">
           <div className="form-group">
             <label className="form-label" htmlFor="context-select">Context</label>
@@ -200,7 +200,7 @@ export default function SituationCard({ onSubmit, isLoading }) {
 
       {/* Section: your state */}
       <section className="form-section">
-        <div className="form-section-title">Your state</div>
+        <h2 className="form-section-title">Your state</h2>
         <div className="form-group">
           <label className="form-label" htmlFor="feeling-select">How are you feeling?</label>
           <select

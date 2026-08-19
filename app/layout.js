@@ -2,7 +2,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 
 export const metadata = {
-  title: 'Mature Response',
+  title: { default: 'Mature Response', template: '%s · Mature Response' },
   description: 'A local-first communication coach. Decide whether and how to respond to a message, or how to word something you need to say.',
 };
 

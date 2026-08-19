@@ -57,6 +57,12 @@ export default function AnalysisResult({ result, onReset }) {
 
   return (
     <div className="result-container" aria-live="polite">
+      {result.saved === false && (
+        <div className="notice notice-error" role="alert">
+          Shown but not saved — your history file could not be written, so this
+          will not appear in History.
+        </div>
+      )}
       {/* Action banner — the single anchor */}
       <div className="result-action-banner">
         <div>
@@ -104,7 +110,7 @@ export default function AnalysisResult({ result, onReset }) {
       {/* Coaching Insight — the teaching layer */}
       {result.coaching_insight && (
         <div className="coaching-insight">
-          <div className="coaching-insight-header coaching-insight-label eyebrow">Coaching Insight</div>
+          <h3 className="coaching-insight-header coaching-insight-label eyebrow">Coaching Insight</h3>
           <p className="coaching-insight-text">{result.coaching_insight}</p>
           {result.tag_seen_count > 0 && (
             <p className="lesson-seen">

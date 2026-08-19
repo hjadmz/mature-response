@@ -3,6 +3,13 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
+  // A cross-origin page can POST text/plain to loopback with no preflight, so
+  // requiring JSON is what actually stops a silent write from another site.
+  if (!(request.headers.get('content-type') || '').includes('application/json')) {
+    return NextResponse.json({ error: 'Expected application/json' }, { status: 415 });
+  }
+
+
     const body = await request.json();
     const { entry_id, outcome, outcome_notes } = body;
 
@@ -21,7 +28,15 @@ export async function POST(request) {
       );
     }
 
-    updateOutcome(entry_id, outcome, outcome_notes);
+    if (!Number.isInteger(entry_id) || entry_id <= 0) {
+      return NextResponse.json({ error: 'entry_id must be a positive integer' }, { status: 400 });
+    }
+    const safeNotes = typeof outcome_notes === 'string' ? outcome_notes.slice(0, 500) : null;
+
+    const result = updateOutcome(entry_id, outcome, safeNotes);
+    if (result.changes === 0) {
+      return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

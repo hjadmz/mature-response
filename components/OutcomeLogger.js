@@ -8,10 +8,12 @@ export default function OutcomeLogger({ entryId, existingOutcome, onLogged }) {
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(!!existingOutcome);
+  const [saveError, setSaveError] = useState('');
 
   async function handleSave() {
     if (!selectedOutcome) return;
     setSaving(true);
+    setSaveError('');
     try {
       const res = await fetch('/api/outcome', {
         method: 'POST',
@@ -25,9 +27,15 @@ export default function OutcomeLogger({ entryId, existingOutcome, onLogged }) {
       if (res.ok) {
         setSaved(true);
         if (onLogged) onLogged(selectedOutcome);
+      } else if (res.status === 404) {
+        setSaveError('That entry no longer exists — it may have been deleted.');
+      } else {
+        // Keep the selection and notes so retrying is one click.
+        setSaveError('Could not save — your history file may be read-only.');
       }
     } catch (err) {
       console.error('Failed to save outcome:', err);
+      setSaveError('Could not reach the app. Nothing was saved.');
     } finally {
       setSaving(false);
     }
@@ -76,6 +84,9 @@ export default function OutcomeLogger({ entryId, existingOutcome, onLogged }) {
             >
               <span className="btn-text">Save Outcome</span>
             </button>
+            {saveError && (
+              <div className="notice notice-error" role="alert" style={{ marginTop: 'var(--space-3)', marginBottom: 0 }}>{saveError}</div>
+            )}
           </div>
         </>
       )}

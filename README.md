@@ -28,7 +28,9 @@ The model proposes; the code decides. A small local model is treated as a fallib
 
 - a clearly constructive message is not allowed to read as high risk;
 - vague or empty input returns *clarify* rather than an invented answer;
-- a self-rated intensity of eight or higher forces a pause before anything is sent.
+- a self-rated intensity of eight or higher, paired with anger, frustration or
+  distress, forces a pause before anything is sent — being very sure is not the
+  same as being flooded.
 
 When you record how a situation turned out, that outcome is folded into the next analysis, so the advice leans toward what has actually worked for you instead of a generic default. The Insights tab shows the same data plainly: the lessons that keep recurring, and which strategies have defused situations versus escalated them.
 
@@ -36,7 +38,8 @@ The drafting follows established practice — Nonviolent Communication for expre
 
 ## Running it
 
-Install three things once: [Node.js](https://nodejs.org) (LTS), [Ollama](https://ollama.com), and at least one chat model:
+Install three things once: [Node.js](https://nodejs.org) 20.9 or newer (the LTS
+download is fine), [Ollama](https://ollama.com), and at least one chat model:
 
 ```bash
 ollama pull llama3:8b
@@ -67,7 +70,21 @@ public/fonts/    self-hosted Inter and JetBrains Mono
 
 ## Privacy
 
-Nothing is uploaded. The database lives in `data/`, which is excluded from version control, so a copy of the project carries no history — every install begins empty.
+Nothing is uploaded: the server binds to 127.0.0.1, requests from any other
+host are refused, Next telemetry is off, and the only network call is to your own
+Ollama. The database lives in `data/` — owner-readable only, and excluded from
+version control, so a copy of the project carries no history and every install
+begins empty.
+
+At the bottom of the History page, once there is at least one entry, **Export all
+(JSON)** downloads everything the app holds, and **Erase all history** deletes it
+permanently — the file is rewritten and the write-ahead log truncated, so the text
+is gone from disk rather than merely unlinked.
+
+Threat model, stated plainly: this protects you from cloud collection and from
+other machines on your network. It does not protect you from malware, another
+person using your unlocked computer, or a browser extension reading the page. For
+disk-level protection, use FileVault or your platform's equivalent.
 
 ## Compatibility
 
