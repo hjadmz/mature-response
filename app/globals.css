@@ -26,6 +26,11 @@
   --color-text-link-hover: #1E3A8A;
 
   --color-border:         #CBD5E1;
+  /* Interactive control boundaries. WCAG 1.4.11 requires 3:1 for the edges
+     that identify a control; the subtle --color-border above is for
+     decorative rules and dividers only. Verified >=3.22:1 on every
+     surface in both themes. */
+  --color-border-control: #7A8A9E;
   --color-border-subtle:  #E2E8F0;
   --color-ring:           #1E40AF;
 
@@ -58,6 +63,7 @@
     --color-text-link-hover: #93C5FD;
 
     --color-border:         #334155;
+    --color-border-control: #7A8A9E;  /* >=4.15:1 on every dark surface */
     --color-border-subtle:  #1E293B;
     --color-ring:           #60A5FA;
 
@@ -85,6 +91,7 @@
   --bg-3: var(--color-surface-raised);
   --edge-1: var(--color-border);
   --edge-2: var(--color-border-subtle);
+  --edge-control: var(--color-border-control);
 
   --type-display: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --type-body:    'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -256,7 +263,7 @@ a:hover { color: var(--color-text-link-hover); }
   padding: 11px 14px;
   background: var(--bg-2);
   color: var(--fg-1);
-  border: 1px solid var(--edge-1);
+  border: 1px solid var(--edge-control);
   border-radius: var(--radius-sm);
   transition: border-color var(--duration-quick) var(--ease-default);
   outline: none;
@@ -293,13 +300,23 @@ a:hover { color: var(--color-text-link-hover); }
   color: var(--fg-1); font-variant-numeric: tabular-nums;
 }
 .slider-input {
+  /* The visual track stays 4px, but the input itself is 44px tall so the
+     control is actually grabbable on touch (WCAG 2.5.8 / Fitts's law).
+     The track is drawn by the ::-*-track pseudo-elements below. */
   -webkit-appearance: none; appearance: none;
-  width: 100%; height: 4px; border-radius: var(--radius-full);
-  background: var(--edge-1); outline: none; cursor: pointer;
+  width: 100%; height: 44px;
+  background: transparent; outline: none; cursor: pointer;
+}
+.slider-input::-webkit-slider-runnable-track {
+  height: 4px; border-radius: var(--radius-full); background: var(--edge-control);
+}
+.slider-input::-moz-range-track {
+  height: 4px; border-radius: var(--radius-full); background: var(--edge-control);
 }
 .slider-input::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
   width: 20px; height: 20px; border-radius: 50%;
+  margin-top: -8px; /* centre the 20px thumb on the 4px track */
   background: var(--inverse-bg); border: 2px solid var(--bg-2);
   box-shadow: 0 0 0 1px var(--edge-1); cursor: pointer;
   transition: transform var(--duration-quick) var(--ease-default);
@@ -363,7 +380,7 @@ a:hover { color: var(--color-text-link-hover); }
 
 .btn-secondary {
   color: var(--fg-1); background: var(--bg-2);
-  box-shadow: inset 0 0 0 1px var(--edge-1), 0 1px 0 0 var(--edge-1), 0 1px 2px 0 rgb(2 6 23 / 0.05);
+  box-shadow: inset 0 0 0 1px var(--edge-control), 0 1px 0 0 var(--edge-control), 0 1px 2px 0 rgb(2 6 23 / 0.05);
 }
 .btn-secondary:hover { background: var(--bg-3); }
 .btn-secondary:active { transform: translateY(1px); box-shadow: inset 0 0 0 1px var(--fg-2); }
@@ -398,7 +415,7 @@ a:hover { color: var(--color-text-link-hover); }
   display: inline-flex; align-items: center; gap: 6px;
   font-family: var(--type-body); font-weight: var(--weight-medium); font-size: 12px;
   padding: 5px 10px; border-radius: var(--radius-sm);
-  background: transparent; border: 1px solid var(--edge-1); color: var(--fg-1);
+  background: transparent; border: 1px solid var(--edge-control); color: var(--fg-1);
 }
 
 /* ─── Analysis result ───────────────────────────────────── */
@@ -459,7 +476,7 @@ a:hover { color: var(--color-text-link-hover); }
   font-family: var(--type-mono); font-size: 11px; font-weight: var(--weight-medium);
   letter-spacing: 0.02em; padding: 5px 9px; cursor: pointer;
   color: var(--fg-2); background: var(--bg-2);
-  border: 1px solid var(--edge-1); border-radius: var(--radius-sm);
+  border: 1px solid var(--edge-control); border-radius: var(--radius-sm);
   transition: background-color var(--duration-quick) var(--ease-default), color var(--duration-quick) var(--ease-default);
 }
 .copy-btn:hover { color: var(--fg-1); background: var(--bg-3); }
@@ -517,7 +534,7 @@ a:hover { color: var(--color-text-link-hover); }
   min-height: 36px; padding: var(--space-2) var(--space-3);
   font-family: var(--type-body); font-size: 13px; font-weight: var(--weight-medium);
   color: var(--fg-2); background: var(--bg-2);
-  border: 1px solid var(--edge-1); border-radius: var(--radius-sm); cursor: pointer;
+  border: 1px solid var(--edge-control); border-radius: var(--radius-sm); cursor: pointer;
   transition: background-color var(--duration-quick) var(--ease-default), color var(--duration-quick) var(--ease-default);
 }
 .outcome-option:hover { color: var(--fg-1); background: var(--bg-3); }
@@ -557,7 +574,7 @@ a:hover { color: var(--color-text-link-hover); }
   font-family: var(--type-body); font-size: var(--step--1);
   padding: var(--space-2) var(--space-4);
   background: var(--bg-2); color: var(--fg-1);
-  border: 1px solid var(--edge-1); border-radius: var(--radius-sm); outline: none;
+  border: 1px solid var(--edge-control); border-radius: var(--radius-sm); outline: none;
   transition: border-color var(--duration-quick) var(--ease-default);
 }
 .search-input:focus { border-color: var(--fg-1); outline: 3px solid var(--color-ring); outline-offset: 2px; }
@@ -566,7 +583,7 @@ a:hover { color: var(--color-text-link-hover); }
   min-height: 44px; font-family: var(--type-body); font-size: var(--step--1);
   padding: var(--space-2) 32px var(--space-2) var(--space-4);
   background: var(--bg-2); color: var(--fg-2);
-  border: 1px solid var(--edge-1); border-radius: var(--radius-sm);
+  border: 1px solid var(--edge-control); border-radius: var(--radius-sm);
   -webkit-appearance: none; appearance: none; cursor: pointer; outline: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 10px center;
@@ -625,7 +642,7 @@ a:hover { color: var(--color-text-link-hover); }
   font-family: var(--type-body); font-size: 13px; font-weight: var(--weight-medium);
   min-height: 32px; padding: var(--space-1) var(--space-3);
   color: var(--fg-2); background: var(--bg-2);
-  border: 1px dashed var(--edge-1); border-radius: var(--radius-full); cursor: pointer;
+  border: 1px dashed var(--edge-control); border-radius: var(--radius-full); cursor: pointer;
   transition: color var(--duration-quick) var(--ease-default),
               background-color var(--duration-quick) var(--ease-default),
               border-color var(--duration-quick) var(--ease-default);
@@ -737,3 +754,21 @@ code {
 }
 .btn-delete:hover { color: var(--color-error); }
 .btn-delete:focus-visible { outline: 3px solid var(--color-ring); outline-offset: 2px; }
+
+/* ─── Narrow phones (folded foldables, iPhone SE) ────────── */
+/* A fixed-height bar cannot grow to a second row without covering the page,
+   and at 320px the third nav link ran off the edge and became unreachable.
+   Below 24rem the header stops floating, is allowed to wrap, and the page
+   gets its vertical space back — the same reasoning as "no sticky header". */
+@media (max-width: 24rem) {
+  .navbar {
+    position: static; height: auto;
+    padding: var(--space-2) var(--space-3);
+  }
+  .navbar-inner { flex-wrap: wrap; gap: var(--space-1) var(--space-3); }
+  .navbar-links { flex-wrap: wrap; }
+  .page-container {
+    padding: var(--space-4) var(--space-3);
+    padding-top: var(--space-4);
+  }
+}
