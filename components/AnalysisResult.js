@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import RiskBadge from './RiskBadge';
 import { ENGAGEMENT_LEVELS, INTENT_TYPES, DESIRED_OUTCOME_LABELS } from '@/lib/constants';
 
@@ -26,6 +26,11 @@ function ConfidenceMeter({ confidence }) {
 
 export default function AnalysisResult({ result, onReset }) {
   const [copied, setCopied] = useState(false);
+  // The submit button is gone by the time this mounts, so move focus to the
+  // recommendation itself: the keyboard user keeps their place and a screen
+  // reader hears the outcome instead of silence after the spinner stops.
+  const headingRef = useRef(null);
+  useEffect(() => { headingRef.current?.focus(); }, []);
 
   const isComm = result.mode === 'communication';
   const engagement = ENGAGEMENT_LEVELS[result.engagement_level] || ENGAGEMENT_LEVELS.wait;
@@ -51,13 +56,13 @@ export default function AnalysisResult({ result, onReset }) {
   }
 
   return (
-    <div className="result-container">
+    <div className="result-container" aria-live="polite">
       {/* Action banner — the single anchor */}
       <div className="result-action-banner">
         <div>
-          <div className="result-action-label eyebrow">
+          <h2 className="result-action-label eyebrow" ref={headingRef} tabIndex={-1}>
             {isComm ? 'Recommended Approach' : 'Recommended Action'}
-          </div>
+          </h2>
           <div className="result-action-text">{engagement.label}</div>
         </div>
         <RiskBadge level={result.risk_level} />

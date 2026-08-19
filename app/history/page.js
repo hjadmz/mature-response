@@ -89,17 +89,6 @@ export default function HistoryPage() {
     setExpandedId(expandedId === id ? null : id);
   }
 
-  function handleCardKey(e, id) {
-    // Space/Enter activate the card like a button (it is keyboard-focusable) —
-    // but only when the CARD ITSELF is focused. Keystrokes inside the expanded
-    // controls (outcome notes, buttons) bubble up here; without this guard,
-    // typing a space in the notes field would collapse the card.
-    if (e.target !== e.currentTarget) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleExpand(id);
-    }
-  }
 
   // Outcome status is filtered client-side (it already rides along on each entry).
   const visibleEntries = entries.filter((e) => {
@@ -202,36 +191,46 @@ export default function HistoryPage() {
               <div
                 key={entry.id}
                 className={`history-card ${isExpanded ? 'expanded' : ''}`}
-                onClick={() => toggleExpand(entry.id)}
-                onKeyDown={(e) => handleCardKey(e, entry.id)}
-                role="button"
-                tabIndex={0}
-                aria-expanded={isExpanded}
               >
-                <div className="history-message">&ldquo;{entry.message_text}&rdquo;</div>
-                <div className="history-meta">
-                  {entry.mode === 'communication' && (
-                    <span className="badge mode-badge">Communicate</span>
-                  )}
-                  {engagement && (
-                    <span className={`badge engagement-badge engagement-${entry.engagement_level}`}>
-                      {engagement.label}
-                    </span>
-                  )}
-                  <RiskBadge level={entry.risk_level} />
-                  {entry.outcome ? (
-                    <span className="outcome-tag">
-                      <span className="dot" style={{ background: OUTCOME_COLORS[entry.outcome] || 'var(--fg-3)' }} />
-                      {OUTCOME_LABELS[entry.outcome] || entry.outcome}
-                    </span>
-                  ) : (
-                    <span className="outcome-tag outcome-tag-pending">Needs outcome</span>
-                  )}
-                  <span className="history-time">{formatDate(entry.created_at)}</span>
-                </div>
+                {/* Only the summary is the control. The panel below is a
+                    sibling, not a descendant: inside a button, its text would
+                    be flattened into one enormous accessible name and could
+                    not be selected or copied. */}
+                <button
+                  type="button"
+                  className="history-card-toggle"
+                  onClick={() => toggleExpand(entry.id)}
+                  aria-expanded={isExpanded}
+                >
+                  <span className="history-message">&ldquo;{entry.message_text}&rdquo;</span>
+                  <span className="history-meta">
+                    {entry.mode === 'communication' && (
+                      <span className="badge mode-badge">Communicate</span>
+                    )}
+                    {engagement && (
+                      <span className={`badge engagement-badge engagement-${entry.engagement_level}`}>
+                        {engagement.label}
+                      </span>
+                    )}
+                    <RiskBadge level={entry.risk_level} />
+                    {entry.outcome ? (
+                      <span className="outcome-tag">
+                        <span className="dot" style={{ background: OUTCOME_COLORS[entry.outcome] || 'var(--fg-3)' }} />
+                        {OUTCOME_LABELS[entry.outcome] || entry.outcome}
+                      </span>
+                    ) : (
+                      <span className="outcome-tag outcome-tag-pending">Needs outcome</span>
+                    )}
+                    <span className="history-time">{formatDate(entry.created_at)}</span>
+                  </span>
+                </button>
 
                 {isExpanded && (
-                  <div className="history-expanded-content" onClick={(e) => e.stopPropagation()}>
+                  <div className="history-expanded-content">
+                    {/* The full message, selectable — the clamped copy in the
+                        button above cannot be dragged over. */}
+                    <p className="history-message-full">&ldquo;{entry.message_text}&rdquo;</p>
+
                     {/* Suggested Response */}
                     {entry.recommended_response && (
                       <div className="result-response-box" style={{ marginBottom: 'var(--space-4)' }}>
