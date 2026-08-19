@@ -14,6 +14,8 @@
 
 /* ─── Canonical tokens · Light (default) ────────────────── */
 :root {
+  color-scheme: light dark;
+
   --color-bg:             #F9FAFB;
   --color-surface:        #FFFFFF;
   --color-surface-raised: #F1F5F9;
@@ -134,7 +136,9 @@
 /* ─── Reset & base ──────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* No font-size here on purpose: pinning 16px would override the reader's own
+   browser font-size setting, and every rem below follows the root. */
+html { -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
 body {
   font-family: var(--type-body);
@@ -144,6 +148,7 @@ body {
   color: var(--fg-1);
   background: var(--bg-1);
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 :focus-visible { outline: 3px solid var(--color-ring); outline-offset: 2px; }
@@ -165,6 +170,7 @@ a:hover { color: var(--color-text-link-hover); }
   padding: var(--space-6) var(--space-4);
   padding-top: calc(var(--nav-height) + var(--space-8));
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .page-title {
@@ -683,6 +689,11 @@ kbd {
   .outcome-options { flex-direction: column; }
 }
 
+/* Long unbroken strings — pasted URLs, Ollama model tags — must wrap
+   rather than push the page sideways. */
+.result-response-text, .result-reason, .coaching-insight-text,
+.history-message, .lesson-row-text { overflow-wrap: anywhere; }
+
 /* ─── Inline code ───────────────────────────────────────── */
 code {
   font-family: var(--type-mono); font-size: 0.9em;
@@ -760,7 +771,7 @@ code {
    and at 320px the third nav link ran off the edge and became unreachable.
    Below 24rem the header stops floating, is allowed to wrap, and the page
    gets its vertical space back — the same reasoning as "no sticky header". */
-@media (max-width: 24rem) {
+@media (max-width: 27rem) {
   .navbar {
     position: static; height: auto;
     padding: var(--space-2) var(--space-3);
@@ -772,3 +783,24 @@ code {
     padding-top: var(--space-4);
   }
 }
+
+/* Respect reduced motion for the button spinner too, not just the page one. */
+@media (prefers-reduced-motion: reduce) {
+  .btn-loading::after { animation: none; }
+}
+
+/* High Contrast mode drops author backgrounds, which is the only thing that
+   marked the active half of the mode toggle and a chosen outcome. */
+@media (forced-colors: active) {
+  .mode-toggle-option.active,
+  .outcome-option.selected { border: 2px solid Highlight; forced-color-adjust: none; }
+  .navbar-link[aria-current="page"] { border-bottom: 2px solid Highlight; }
+}
+
+/* Firefox draws no focus ring on a styled range input, and .filter-select
+   suppressed its own without replacing it. */
+.filter-select:focus-visible,
+.slider-input:focus-visible {
+  outline: 3px solid var(--color-ring); outline-offset: 2px;
+}
+.slider-input::-moz-range-thumb:focus { outline: 3px solid var(--color-ring); }

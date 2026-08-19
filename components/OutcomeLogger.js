@@ -51,6 +51,7 @@ export default function OutcomeLogger({ entryId, existingOutcome, onLogged }) {
             key={opt.value}
             type="button"
             className={`outcome-option ${selectedOutcome === opt.value ? 'selected' : ''}`}
+            aria-pressed={selectedOutcome === opt.value}
             onClick={() => setSelectedOutcome(opt.value)}
           >
             {opt.label}

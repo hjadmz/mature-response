@@ -30,7 +30,7 @@ export async function POST(request) {
     const safeContext = VALID_CONTEXTS.has(context_type) ? context_type : 'online';
     const safeTone = selectedMode === 'communication' ? null : (VALID_TONES.has(perceived_tone) ? perceived_tone : 'unclear');
     const safeFeeling = VALID_FEELINGS.has(feeling) ? feeling : 'calm';
-    const safeOutcome = desired_outcome in DESIRED_OUTCOME_LABELS ? desired_outcome : '';
+    const safeOutcome = Object.prototype.hasOwnProperty.call(DESIRED_OUTCOME_LABELS, desired_outcome) ? desired_outcome : '';
     const safeIntensity = Math.min(10, Math.max(1, Math.round(Number(emotional_reaction)) || 5));
     const safeNote = typeof optional_note === 'string' ? optional_note.slice(0, MAX_NOTE_CHARS) : '';
 
@@ -55,7 +55,9 @@ export async function POST(request) {
     const tagSeenCount = getTagCount(analysis.coaching_tag);
 
     // Store in DB (the sanitized values — what was actually analyzed)
+    // Spread the model's output FIRST so trusted, sanitized values always win.
     const entryId = insertEntry({
+      ...analysis,
       message_text,
       context_type: safeContext,
       perceived_tone: safeTone,
@@ -64,14 +66,13 @@ export async function POST(request) {
       optional_note: safeNote,
       desired_outcome: safeOutcome,
       model_used: selectedModel,
-      ...analysis,
     });
 
     return NextResponse.json({
+      ...analysis,
       id: entryId,
       tag_seen_count: tagSeenCount,
       desired_outcome: safeOutcome, // echo back so the result view can show the goal chip
-      ...analysis,
     });
   } catch (error) {
     console.error('Analyze error:', error);

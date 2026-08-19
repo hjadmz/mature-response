@@ -36,7 +36,9 @@ export default function AnalyzingState() {
       <div className="analyzing-state" role="status" aria-live="polite">
         <div className="analyzing-spinner" />
         <div className="analyzing-text">{STEPS[step]}</div>
-        <div className="analyzing-elapsed numeric">{elapsed}s</div>
+        {/* inside a polite live region: announcing every tick would flood a
+            screen reader, so the count is visual only */}
+        <div className="analyzing-elapsed numeric" aria-hidden="true">{elapsed}s</div>
         {elapsed >= FIRST_RUN_HINT_S && (
           <div className="analyzing-subtext">
             First run loads the model into memory — this one is slower. Later runs are quick.

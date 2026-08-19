@@ -150,6 +150,7 @@ export default function HistoryPage() {
           type="text"
           className="search-input"
           placeholder="Search messages..."
+          aria-label="Search messages"
           value={searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}
           id="history-search"
@@ -159,6 +160,7 @@ export default function HistoryPage() {
           value={contextFilter}
           onChange={(e) => setContextFilter(e.target.value)}
           id="context-filter"
+          aria-label="Filter by context"
         >
           <option value="all">All Contexts</option>
           {CONTEXT_TYPES.map((c) => (
